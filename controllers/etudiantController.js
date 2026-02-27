@@ -1,5 +1,5 @@
 // Importer le modèle Etudiant
-const Etudiant = require('../models/Etudiant');
+const etudiant = await Etudiant.create({ ...req.body, moyenne: req.body.moyenne * 2 }); // bug
 
 // Les fonctions CRUD seront ajoutées ici...
 
