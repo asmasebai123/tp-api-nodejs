@@ -1,0 +1,56 @@
+name: Coverage - Rapport de couverture
+
+# Partie 3 : workflow dédié à la couverture de code
+# Génère un rapport HTML/LCOV et le publie comme artefact téléchargeable.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # permet de lancer manuellement depuis l'onglet Actions
+
+jobs:
+  coverage:
+    name: Génération du rapport de couverture
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Installation de Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: 📦 Installation des dépendances
+        run: npm ci
+
+      - name: 📊 Exécution des tests avec couverture
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+
+      - name: 📤 Upload du rapport de couverture
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: 📝 Résumé de couverture dans le job
+        if: always()
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "## 📊 Rapport de couverture" >> $GITHUB_STEP_SUMMARY
+            node -e "
+              const s = require('./coverage/coverage-summary.json').total;
+              console.log('| Métrique | Couvert | Total | % |');
+              console.log('|---|---|---|---|');
+              ['lines','statements','functions','branches'].forEach(k => {
+                console.log('| ' + k + ' | ' + s[k].covered + ' | ' + s[k].total + ' | ' + s[k].pct + '% |');
+              });
+            " >> $GITHUB_STEP_SUMMARY
+          fi
