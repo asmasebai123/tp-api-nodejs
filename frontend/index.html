@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GestiNotes — Gestion des étudiants</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark">GN</span>
+        <span class="brand-name">GestiNotes</span>
+      </div>
+      <div class="header-meta">
+        <span class="api-status" id="apiStatus">
+          <span class="dot"></span> Connexion…
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1 class="hero-title">Gestion des <em>notes</em></h1>
+      <p class="hero-sub">API Node.js · MongoDB · CI/CD · AWS</p>
+    </section>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card">
+        <span class="stat-num" id="statTotal">—</span>
+        <span class="stat-label">Étudiants</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statAdmis">—</span>
+        <span class="stat-label">Admis</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statMoyGen">—</span>
+        <span class="stat-label">Moyenne générale</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statAjd">—</span>
+        <span class="stat-label">Ajoutés aujourd'hui</span>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un étudiant…" />
+      </div>
+      <button class="btn btn-primary" id="btnNouvel">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Nouvel étudiant
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table class="table" id="etudiantsTable">
+        <thead>
+          <tr>
+            <th>Étudiant</th>
+            <th>Email</th>
+            <th>Notes</th>
+            <th>Moyenne</th>
+            <th>Mention</th>
+            <th>Statut</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="etudiantsBody">
+          <tr class="loading-row">
+            <td colspan="7"><div class="spinner"></div> Chargement…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- ═══ MODAL ÉTUDIANT ═══ -->
+  <div class="modal-backdrop" id="modalEtudiant" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Nouvel étudiant</h2>
+        <button class="modal-close" id="btnFermerModal" aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="label" for="inputNom">Nom</label>
+          <input class="input" type="text" id="inputNom" placeholder="Ex : Ben Ali" />
+        </div>
+        <div class="form-group">
+          <label class="label" for="inputPrenom">Prénom</label>
+          <input class="input" type="text" id="inputPrenom" placeholder="Ex : Asma" />
+        </div>
+        <div class="form-group">
+          <label class="label" for="inputEmail">Email</label>
+          <input class="input" type="email" id="inputEmail" placeholder="asma@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="label" for="inputNotes">Notes initiales <span class="hint">(séparées par des virgules, entre 0 et 20)</span></label>
+          <input class="input" type="text" id="inputNotes" placeholder="Ex : 12, 15.5, 8" />
+        </div>
+        <div class="modal-error" id="modalError" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btnAnnuler">Annuler</button>
+        <button class="btn btn-primary" id="btnSauvegarder">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL NOTE ═══ -->
+  <div class="modal-backdrop" id="modalNote" hidden>
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Ajouter une note</h2>
+        <button class="modal-close" id="btnFermerNote" aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-student-name" id="noteStudentName"></p>
+        <div class="form-group">
+          <label class="label" for="inputNote">Note <span class="hint">(0 – 20)</span></label>
+          <input class="input" type="number" id="inputNote" min="0" max="20" step="0.5" placeholder="Ex : 14" />
+        </div>
+        <div class="modal-error" id="noteError" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btnAnnulerNote">Annuler</button>
+        <button class="btn btn-accent" id="btnAjouterNote">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL DÉTAIL ═══ -->
+  <div class="modal-backdrop" id="modalDetail" hidden>
+    <div class="modal modal-detail">
+      <div class="modal-header">
+        <h2 class="modal-title" id="detailNom"></h2>
+        <button class="modal-close" id="btnFermerDetail" aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TOAST ═══ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

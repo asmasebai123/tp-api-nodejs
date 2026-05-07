@@ -246,3 +246,5 @@ npm start
 ## Licence
 
 MIT — Projet pédagogique.
+LabIDEURL	https://d3qx9j6mbrylbr.cloudfront.net/?folder=/home/ec2-user/environment
+LabIDEPassword	76315990
